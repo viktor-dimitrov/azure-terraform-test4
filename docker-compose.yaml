@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+    server:
+        environment:
+            - ACCEPT_EULA=Y
+            - MSSQL_SA_PASSWORD=myStrongPassword12#
+        ports:
+            - 1433:1433
+        volumes:
+            - sqldata:/var/opt/mssql
+        networks:
+            - contacts
+        container_name: sqlserver
+        image: mcr.microsoft.com/mssql/server
+        deploy:
+            resources:
+              reservations:
+                cpus: '2'
+                memory: '2GB'
+    web-app:
+        container_name: contactsapp
+        image: konspirat0rcontactsscr.azurecr.io/contactsimage
+        domainname: konspira0r
+        networks:
+            - contacts
+        ports:
+            - 80:80
+        build:
+          dockerfile: ./Dockerfile
+        restart: on-failure
+
+networks:
+    contacts:
+        external: true
+        name: contacts
+volumes:
+    sqldata:
+        driver: azure_file
+        driver_opts:
+            share_name: sql-volume
+            storage_account_name: contactsstorageacc
+            
